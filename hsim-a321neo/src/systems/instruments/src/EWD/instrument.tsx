@@ -1,4 +1,15 @@
-import { Clock, EventBus, FSComponent, InstrumentBackplane } from '@microsoft/msfs-sdk';
+// Copyright (c) 2021-2023 FlyByWire Simulations
+//
+// SPDX-License-Identifier: GPL-3.0
+
+import {
+  AdcPublisher,
+  Clock,
+  EventBus,
+  FSComponent,
+  InstrumentBackplane,
+  StallWarningPublisher,
+} from '@microsoft/msfs-sdk';
 import { FuelSystemPublisher } from 'instruments/src/MsfsAvionicsCommon/providers/FuelSystemPublisher';
 import { ArincValueProvider } from './shared/ArincValueProvider';
 import { EwdComponent } from './EWD';
@@ -8,50 +19,56 @@ import { PseudoFWC } from './PseudoFWC';
 import './style.scss';
 
 class A32NX_EWD extends BaseInstrument {
-    private readonly bus = new EventBus();
+  private readonly bus = new EventBus();
 
-    private readonly backplane = new InstrumentBackplane();
+  private readonly backplane = new InstrumentBackplane();
 
-    private readonly simVarPublisher = new EwdSimvarPublisher(this.bus);
+  private readonly simVarPublisher = new EwdSimvarPublisher(this.bus);
 
-    private readonly arincProvider = new ArincValueProvider(this.bus);
+  private readonly arincProvider = new ArincValueProvider(this.bus);
 
-    private readonly clock = new Clock(this.bus);
+  private readonly clock = new Clock(this.bus);
 
-    private readonly fuelSystemPublisher = new FuelSystemPublisher(this.bus);
+  private readonly fuelSystemPublisher = new FuelSystemPublisher(this.bus);
 
-    private readonly pseudoFwc = new PseudoFWC(this.bus, this);
+  private readonly adcPublisher = new AdcPublisher(this.bus);
 
-    constructor() {
-        super();
+  private readonly stallWarningPublisher = new StallWarningPublisher(this.bus, 0.9);
 
-        this.backplane.addInstrument('Clock', this.clock);
-        this.backplane.addPublisher('SimVars', this.simVarPublisher);
-        this.backplane.addPublisher('FuelSystem', this.fuelSystemPublisher);
-        this.backplane.addInstrument('Fwc', this.pseudoFwc);
-    }
+  private readonly pseudoFwc = new PseudoFWC(this.bus, this);
 
-    get templateID(): string {
-        return 'A21NHS_EWD';
-    }
+  constructor() {
+    super();
 
-    public connectedCallback(): void {
-        super.connectedCallback();
+    this.backplane.addInstrument('Clock', this.clock);
+    this.backplane.addPublisher('SimVars', this.simVarPublisher);
+    this.backplane.addPublisher('FuelSystem', this.fuelSystemPublisher);
+    this.backplane.addPublisher('adc', this.adcPublisher);
+    this.backplane.addPublisher('stallWarning', this.stallWarningPublisher);
+    this.backplane.addInstrument('Fwc', this.pseudoFwc);
+  }
 
-        this.arincProvider.init();
-        this.backplane.init();
+  get templateID(): string {
+    return 'A21NHS_EWD';
+  }
 
-        FSComponent.render(<EwdComponent bus={this.bus} instrument={this} />, document.getElementById('EWD_CONTENT'));
+  public connectedCallback(): void {
+    super.connectedCallback();
 
-        // Remove "instrument didn't load" text
-        document.getElementById('EWD_CONTENT').querySelector(':scope > h1').remove();
-    }
+    this.arincProvider.init();
+    this.backplane.init();
 
-    public Update(): void {
-        super.Update();
+    FSComponent.render(<EwdComponent bus={this.bus} instrument={this} />, document.getElementById('EWD_CONTENT'));
 
-        this.backplane.onUpdate();
-    }
+    // Remove "instrument didn't load" text
+    document.getElementById('EWD_CONTENT').querySelector(':scope > h1').remove();
+  }
+
+  public Update(): void {
+    super.Update();
+
+    this.backplane.onUpdate();
+  }
 }
 
 registerInstrument('a32nx-ewd', A32NX_EWD);

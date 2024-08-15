@@ -1,3 +1,7 @@
+// Copyright (c) 2021-2023 FlyByWire Simulations
+//
+// SPDX-License-Identifier: GPL-3.0
+
 class CDUFuelPredPage {
     static ShowPage(mcdu) {
         mcdu.clearDisplay();
@@ -5,11 +9,15 @@ class CDUFuelPredPage {
         mcdu.pageRedrawCallback = () => CDUFuelPredPage.ShowPage(mcdu);
         mcdu.activeSystem = 'FMGC';
         const isFlying = mcdu.isFlying();
+
+        const destination = mcdu.flightPlanService.active ? mcdu.flightPlanService.active.destinationAirport : undefined;
+        const alternate = mcdu.flightPlanService.active ? mcdu.flightPlanService.active.alternateDestinationAirport : undefined;
+
         let destIdentCell = "NONE";
         let destTimeCell = "----";
         let destTimeCellColor = "[color]white";
         let destEFOBCell = "---.-";
-        const destEFOBCellColor = "[color]white";
+        let destEFOBCellColor = "[color]white";
 
         let altIdentCell = "NONE";
         let altTimeCell = "----";
@@ -26,7 +34,11 @@ class CDUFuelPredPage {
         let zfwCgCell = (" __._");
         let zfwColor = "[color]amber";
         mcdu.onRightInput[2] = async (value, scratchpadCallback) => {
-            if (value === "") {
+            if (value === FMCMainDisplay.clrValue) {
+                mcdu.setScratchpadMessage(NXSystemMessages.notAllowed);
+                scratchpadCallback();
+                return;
+            } else if (value === "") {
                 mcdu.setScratchpadText(
                     (isFinite(getZfw()) ? (getZfw() / 1000).toFixed(1) : "") +
                     "/" +
@@ -81,13 +93,12 @@ class CDUFuelPredPage {
                 zfwColor = "[color]cyan";
             }
 
-            if (mcdu.altDestination) {
-                altIdentCell = mcdu.altDestination.ident;
+            if (alternate) {
+                altIdentCell = alternate.ident;
             }
 
-            const dest = mcdu.flightPlanManager.getDestination();
-            if (dest) {
-                destIdentCell = dest.ident;
+            if (destination) {
+                destIdentCell = destination.ident;
             }
 
             gwCell = "{small}" + (NXUnits.kgToUser(mcdu.getGW()).toFixed(1));
@@ -127,7 +138,7 @@ class CDUFuelPredPage {
                     }
                 };
 
-                if (mcdu.altDestination) {
+                if (alternate) {
                     const altnFuelEntered = mcdu._routeAltFuelEntered;
                     if (!altnFuelEntered) {
                         mcdu.tryUpdateRouteAlternate();
@@ -157,14 +168,16 @@ class CDUFuelPredPage {
                         scratchpadCallback();
                     }
                 };
-                if (mcdu.altDestination) {
-                    altIdentCell = mcdu.altDestination.ident;
+                if (alternate) {
+                    altIdentCell = alternate.ident;
                     altEFOBCell = (NXUnits.kgToUser(mcdu.getAltEFOB(true))).toFixed(1);
                     altEFOBCellColor = "[color]green";
                 }
 
                 mcdu.tryUpdateRouteTrip(isFlying);
-                const dest = mcdu.flightPlanManager.getDestination();
+
+                const dest = mcdu.flightPlanService.active.destinationAirport;
+
                 if (dest) {
                     destIdentCell = dest.ident;
                 }
@@ -174,7 +187,7 @@ class CDUFuelPredPage {
                 destTimeCell = isFlying ? FMCMainDisplay.secondsToUTC(utcTime + FMCMainDisplay.minuteToSeconds(mcdu._routeTripTime))
                     : destTimeCell = FMCMainDisplay.minutesTohhmm(mcdu._routeTripTime);
 
-                if (mcdu.altDestination) {
+                if (alternate) {
                     if (mcdu.getRouteAltFuelTime()) {
                         altTimeCell = isFlying ? FMCMainDisplay.secondsToUTC(utcTime + FMCMainDisplay.minuteToSeconds(mcdu._routeTripTime) + FMCMainDisplay.minuteToSeconds(mcdu.getRouteAltFuelTime()))
                             : FMCMainDisplay.minutesTohhmm(mcdu.getRouteAltFuelTime());
@@ -248,6 +261,8 @@ class CDUFuelPredPage {
                 if (isFinite(mcdu.zeroFuelWeightMassCenter)) {
                     zfwCgCell = mcdu.zeroFuelWeightMassCenter.toFixed(1);
                 }
+
+                destEFOBCellColor = mcdu._isBelowMinDestFob ? "[color]amber" : "[color]green";
             }
         }
 

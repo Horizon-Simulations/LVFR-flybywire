@@ -13,14 +13,22 @@ const root = join(__dirname, '..', '..', '..', '..', '..', '..');
 console.log('Root: ', root);
 
 export default {
-    input: join(__dirname, 'instrument.tsx'),
-    output: {
-        file: join(root, 'build-a321neo/out/lvfr-horizonsim-airbus-a321-neo/html_ui/Pages/VCockpit/Instruments/A21NHS/EWD/instrument.js'),
-        format: 'es',
-    },
-    plugins: [
-        scss({ output: join(root, 'build-a321neo/out/lvfr-horizonsim-airbus-a321-neo/html_ui/Pages/VCockpit/Instruments/A21NHS/EWD/ewd.css') }),
-        resolve(),
-        ts(),
-    ],
+  input: join(__dirname, 'instrument.tsx'),
+  output: {
+    file: join(
+      root,
+      'build-a321neo/out/lvfr-horizonsim-airbus-a321-neo/html_ui/Pages/VCockpit/Instruments/A21NHS/EWD/instrument.js',
+    ),
+    format: 'es',
+  },
+  plugins: [
+    scss({
+      output: join(
+        root,
+        'build-a321neo/out/lvfr-horizonsim-airbus-a321-neo/html_ui/Pages/VCockpit/Instruments/A21NHS/EWD/ewd.css',
+      ),
+    }),
+    resolve(),
+    ts(),
+  ],
 };
