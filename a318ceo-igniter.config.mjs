@@ -126,19 +126,21 @@ export default new TaskOfTasks("all", [
         new TaskOfTasks(
             "wasm",
             [
-                new ExecTask("fadec", "npm run build-a318ceo:fadec", [
-                    "build-a318ceo/src/wasm/fadec_a318cfm",
-                    "fbw-common/src/wasm/fbw_common",
-                    "fbw-common/src/wasm/fadec_common",
-                    "build-a318ceo/out/lvfr-horizonsim-airbus-a318-ceo/SimObjects/Airplanes/A318ceoCFM/panel/fadec.wasm",
-                ]),
-                new ExecTask("fbw", "npm run build-a318ceo:fbw", [
+                new ExecTask("systems",
+                    "npm run build-a318ceo:systems",
+                    [
+                        "build-a318ceo/src/wasm/systems",
+                        "fbw-common/src/wasm/systems",
+                        "Cargo.lock",
+                        "Cargo.toml",
+                        "build-a318ceo/out/lvfr-horizonsim-airbus-a318-ceo/SimObjects/Airplanes/A318ceoCFM/panel/systems.wasm"
+                 ]),
+                new ExecTask("systems-fbw", "npm run build-a318ceo:fbw", [
                     "build-a318ceo/src/wasm/fbw_a320",
                     "fbw-common/src/wasm/fbw_common",
                     "build-a318ceo/out/lvfr-horizonsim-airbus-a318-ceo/SimObjects/Airplanes/A318ceoCFM/panel/fbw.wasm",
                 ]),
-                new ExecTask(
-                    "systems-terronnd",
+                new ExecTask("systems-terronnd",
                     [
                         "npm run build-a318ceo:terronnd",
                     ],
@@ -148,25 +150,16 @@ export default new TaskOfTasks("all", [
                         "fbw-common/src/wasm/terronnd/out/terronnd.wasm",
                     ]
                 ),
-                new ExecTask(
-                    "extra-backend-a32nx",
-                    "npm run build-a318ceo:cpp-wasm-cmake",
-                    [
+                new ExecTask("cpp-wasm-cmake",
+                    "npm run build-a318ceo:cpp-wasm-cmake", [
                         'fbw-common/src/wasm/cpp-msfs-framework',
                         'fbw-common/src/wasm/extra-backend',
+                        'fbw-common/src/wasm/fadec_common',
+                        'build-a318ceo/src/wasm/fadec_a32nx',
                         "build-a318ceo/src/wasm/extra-backend-a32nx",
                         "build-a318ceo/out/lvfr-horizonsim-airbus-a318-ceo/SimObjects/Airplanes/A318ceoCFM/panel/extra-backend-a32nx.wasm",
-                    ]
-                ),
-                new ExecTask("systems",
-                "npm run build-a318ceo:systems",
-                [
-                    "build-a318ceo/src/wasm/systems",
-                    "fbw-common/src/wasm/systems",
-                    "Cargo.lock",
-                    "Cargo.toml",
-                    "build-a318ceo/out/lvfr-horizonsim-airbus-a318-ceo/SimObjects/Airplanes/A318ceoCFM/panel/systems.wasm"
-             ]),
+                        "build-a318ceo/out/lvfr-horizonsim-airbus-a318-ceo/SimObjects/Airplanes/A318ceoCFM/panel/fadec-a318.wasm",
+                    ]),
             ],
             true
         ),
