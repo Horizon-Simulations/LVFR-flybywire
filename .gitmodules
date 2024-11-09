@@ -1,4 +1,4 @@
 [submodule "flybywire"]
 	path = flybywire
 	url = https://github.com/flybywiresim/aircraft
-	branch = v0.12.1
+	branch = v0.12.2
