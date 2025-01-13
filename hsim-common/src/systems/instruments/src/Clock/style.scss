@@ -1,6 +1,6 @@
 @font-face {
   font-family: "AirbusChronometer";
-  src: url("/Fonts/AirbusChronometer.ttf") format("truetype");
+  src: url("#{$font-file-path}/AirbusChronometer.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
@@ -20,7 +20,6 @@ svg {
   width: 256px;
   height: 256px;
   background: rgba(2, 2, 8, 1);
-  /* TODO: Remove opacity when SAI/ISIS/CLOCK/BAT/ATC/RMP/RUD TRIM is split and not share the same emissive/mesh */
   opacity: 1;
 }
 
