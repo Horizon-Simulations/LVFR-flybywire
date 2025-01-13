@@ -30,9 +30,9 @@ const vnavConfig: VnavConfig = {
 };
 
 const flightModelParams: FlightModelParameters = {
-  Cd0: 0.01300,
-  wingSpan: 111.88
-  wingArea: 1319.7,
+  Cd0: 0.02475,
+  wingSpan: 117.454
+  wingArea: 1317.47,
   wingEffcyFactor: 0.60,
   requiredAccelRateKNS: 1.33,
   requiredAccelRateMS2: 0.684,
@@ -46,7 +46,7 @@ const flightModelParams: FlightModelParameters = {
 };
 
 const engineModelParams: EngineModelParameters = {
-  maxThrust: 23300,
+  maxThrust: 33110,
   numberOfEngines: 2,
   fuelBurnFactor: 1.0,
 };
