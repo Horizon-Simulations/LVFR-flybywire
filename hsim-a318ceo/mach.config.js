@@ -1,9 +1,9 @@
 const imagePlugin = require('esbuild-plugin-inline-image');
-const postCssPlugin = require('esbuild-style-plugin');
+const postCssPlugin = require('esbuild-style-plugin-v2');
 const tailwind = require('tailwindcss');
 const postCssColorFunctionalNotation = require('postcss-color-functional-notation');
 const postCssInset = require('postcss-inset');
-const { typecheckingPlugin } = require("#build-utils");
+const { typecheckingPlugin } = require('#build-utils');
 
 // process.env.FBW_TYPECHECK = "1";
 
@@ -19,37 +19,38 @@ module.exports = {
                 plugins: [
                     tailwind('../fbw-common/src/systems/instruments/src/EFB/tailwind.config.js'),
 
-                    // transform: hsl(x y z / alpha) -> hsl(x, y, z, alpha)
-                    postCssColorFunctionalNotation(),
+          // transform: hsl(x y z / alpha) -> hsl(x, y, z, alpha)
+          postCssColorFunctionalNotation(),
 
-                    // transform: inset: 0; -> top/right/left/bottom: 0;
-                    postCssInset(),
-                ],
-            }
-        }),
-        typecheckingPlugin(),
-    ],
-    instruments: [
-        msfsAvionicsInstrument('PFD'),
-        msfsAvionicsInstrument('ND'),
-        msfsAvionicsInstrument('EWD'),
-        msfsAvionicsInstrument('Clock'),
+          // transform: inset: 0; -> top/right/left/bottom: 0;
+          postCssInset(),
+        ],
+      },
+    }),
+    typecheckingPlugin(),
+  ],
+  instruments: [
+    msfsAvionicsInstrument('PFD'),
+    msfsAvionicsInstrument('ND'),
+    msfsAvionicsInstrument('EWD'),
+    msfsAvionicsInstrument('Clock'),
+    msfsAvionicsInstrument('OANC'),
 
-        reactInstrument('SD'),
-        reactInstrument('DCDU'),
-        reactInstrument('RTPI'),
-        reactInstrument('RMP'),
-        reactInstrument('ISIS'),
-        reactInstrument('BAT'),
-        reactInstrument('ATC'),
-        reactInstrument('EFB', ['/Pages/VCockpit/Instruments/Shared/Map/MapInstrument.html']),
-    ],
+    reactInstrument('SD'),
+    reactInstrument('DCDU'),
+    reactInstrument('RTPI'),
+    reactInstrument('RMP'),
+    reactInstrument('ISIS'),
+    reactInstrument('BAT'),
+    reactInstrument('ATC'),
+    reactInstrument('EFB', ['/Pages/VCockpit/Instruments/Shared/Map/MapInstrument.html']),
+  ],
 };
 
-function msfsAvionicsInstrument(name, folder = name) {
+function msfsAvionicsInstrument(name, index = 'instrument.tsx') {
     return {
         name,
-        index: `src/systems/instruments/src/${folder}/instrument.tsx`,
+        index: `src/systems/instruments/src/${name}/${index}`,
         simulatorPackage: {
             type: 'baseInstrument',
             templateId: `A318HS_${name}`,
