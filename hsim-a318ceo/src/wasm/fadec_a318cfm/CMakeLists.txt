@@ -1,26 +1,40 @@
-# This CMakeLists.txt file is used only for syntax highlighting and navigating
-# through the code in an IDE. It is not used for building the project.
+# flybywire-a32nx-fadec-v2 CMakeLists.txt
 
-cmake_minimum_required(VERSION 3.19)
+# add additional compiler definitions for the a32nx fadec-v2 build
+add_definitions()
 
-project(flybywire-a32nx-fadec)
-
-set(CMAKE_CXX_STANDARD 20)
-set(MSFS_SDK "C:\\MSFS SDK")
-
-set(CMAKE_CXX_FLAGS "-c -g -DDEBUG -Wno-unused-command-line-argument -Wno-ignored-attributes -Wno-macro-redefined --sysroot \"${MSFS_SDK}/WASM/wasi-sysroot\" -target wasm32-unknown-wasi -flto -D_MSFS_WASM=1 -D__wasi__ -D_LIBCPP_HAS_NO_THREADS -D_WINDLL -D_MBCS -mthread-model single -fno-exceptions -fms-extensions")
-
-include_directories("${MSFS_SDK}/WASM/include")
-include_directories("${MSFS_SDK}/WASM/wasi-sysroot/include")
-include_directories("${MSFS_SDK}/SimConnect SDK/include")
-
+# add the local include directories
 include_directories(
-    ./src
-    ${FBW_ROOT}/fbw-common/src/wasm/fadec_common/src
-    ${FBW_ROOT}/fbw-common/src/wasm/fbw_common/src
-    ${FBW_ROOT}/fbw-common/src/wasm/fbw_common/src/inih
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Fadec
+    ${FBW_COMMON}/cpp-msfs-framework/
+    ${FBW_COMMON}/fadec_common/src/
 )
 
-add_executable(flybywire-a32nx-fadec
-    ./src/FadecGauge.cpp
-    )
+# define the source files
+set(SOURCE_FILES
+    ${FBW_COMMON}/fadec_common/src/Fadec.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Gauge_Fadec.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Fadec/Fadec_A32NX.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Fadec/EngineControlA32NX.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Fadec/FuelConfiguration_A32NX.cpp
+)
+
+set(INCLUDE_FILES
+    ${FBW_COMMON}/fadec_common/src/Fadec.h
+    ${FBW_COMMON}/fadec_common/src/EngineRatios.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Fadec/Fadec_A32NX.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Fadec/FadecSimData_A32NX.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Fadec/EngineControlA32NX.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Fadec/FuelConfiguration_A32NX.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Fadec/ThrustLimits_A32NX.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Fadec/Polynomials_A32NX.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Fadec/Tables1502_A32NX.hpp
+)
+
+# create the targets
+add_library(fadec-a32nx OBJECT ${SOURCE_FILES} ${INCLUDE_FILES})
+add_wasm_library(
+    NAME fadec-a32nx
+    DEPENDENCIES fadec-a32nx cpp-msfs-framework-a32nx
+)
