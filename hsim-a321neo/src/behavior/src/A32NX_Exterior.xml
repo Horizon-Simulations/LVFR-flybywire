@@ -2,11 +2,40 @@
 <!-- SPDX-License-Identifier: GPL-3.0 -->
 
 <ModelBehaviors>
+    <Template Name="FBW_LIGHTING_Exterior_Retractable_Light_Template">
+        <DefaultTemplateParameters>
+            <ANIM_NAME>LIGHTING_Retractable_#LIGHT_TYPE#_Light_#ID#</ANIM_NAME>
+            <ANIM_LAG>100</ANIM_LAG>
+            <ANIM_FRAMES>100</ANIM_FRAMES>
+        </DefaultTemplateParameters>
+        <UseTemplate Name="ASOBO_GT_Anim_Code">
+            <ANIM_CODE type="rnp" return="number" >
+                alias currentPosition = (O:AnimCode, number);
+                alias publishedPosition = (L:A32NX_#LIGHT_TYPE#_#ID#_POSITION, number);
+                let animSpeed = #ANIM_FRAMES, number# / #ANIM_LAG, number#;
+                let animProgress = animSpeed * (A:ANIMATION DELTA TIME, seconds);
+                let requestedPosition = if (L:#LIGHT_TYPE#_#ID#_Retracted, boolean) {0} else {100};
+
+                if currentPosition != requestedPosition {
+                    let newPosition = 0;
+                    if requestedPosition > 0 {
+                       newPosition = (currentPosition + animProgress).min(requestedPosition);
+                    } else {
+                       newPosition = (currentPosition - animProgress).max(requestedPosition);
+                    }
+                    publishedPosition = newPosition;
+                } else {
+                    publishedPosition = currentPosition;
+                }
+                publishedPosition
+            </ANIM_CODE>
+        </UseTemplate>
+    </Template>
     <Template Name="A32NX_ENGINE_Turbine_Template">
         <DefaultTemplateParameters>
             <ID>1</ID>
-            <MIN_N1_PCT_FOR_SLOW>30000</MIN_N1_PCT_FOR_SLOW>
-            <MIN_N1_PCT_FOR_BLUR>30000</MIN_N1_PCT_FOR_BLUR>
+            <MIN_N1_PCT_FOR_SLOW>7</MIN_N1_PCT_FOR_SLOW>
+            <MIN_N1_PCT_FOR_BLUR>110</MIN_N1_PCT_FOR_BLUR>
             <FROSTED>False</FROSTED>
         </DefaultTemplateParameters>
         <UseTemplate Name="A32NX_ENGINE_Turbine_SubTemplate"/>
@@ -60,7 +89,7 @@
     <Template Name="A32NX_ENGINE_Turbine_Rotation_Template">
         <UseTemplate Name="ASOBO_GT_Anim">
             <!-- 3856 is the rated 100% N1 of the LEAP, times 6 is from RPM to deg/s, times 0.01 because percentages -->
-            <ANIM_CODE>0.01 6 3856 (L:A32NX_ENGINE_N1:#ID#, Percent) (A:ANIMATION DELTA TIME, seconds) * * * *</ANIM_CODE>
+            <ANIM_CODE>0.01 6 3856 (L:A32NX_ENGINE_N1:#ID#, Number) (A:ANIMATION DELTA TIME, seconds) * * * *</ANIM_CODE>
             <ANIM_LENGTH>360</ANIM_LENGTH>
             <ANIM_WRAP>1</ANIM_WRAP>
             <ANIM_DELTA>1</ANIM_DELTA>
@@ -68,20 +97,20 @@
     </Template>
     <Template Name="A32NX_ENGINE_Turbine_Still_Visibility_Template">
         <UseTemplate Name="ASOBO_GT_Visibility">
-            <VISIBILITY_CODE>(L:A32NX_ENGINE_N1:#ID#, Percent) #MIN_N1_PCT_FOR_SLOW# &lt;</VISIBILITY_CODE>
+            <VISIBILITY_CODE>(L:A32NX_ENGINE_N1:#ID#, Number) #MIN_N1_PCT_FOR_SLOW# &lt;</VISIBILITY_CODE>
         </UseTemplate>
     </Template>
     <Template Name="A32NX_ENGINE_Turbine_Slow_Visibility_Template">
         <UseTemplate Name="ASOBO_GT_Visibility">
             <VISIBILITY_CODE>
-                (L:A32NX_ENGINE_N1:#ID#, Percent) #MIN_N1_PCT_FOR_SLOW# &gt;
-                (L:A32NX_ENGINE_N1:#ID#, Percent) #MIN_N1_PCT_FOR_BLUR# &lt; and
+                (L:A32NX_ENGINE_N1:#ID#, Number) #MIN_N1_PCT_FOR_SLOW# &gt;
+                (L:A32NX_ENGINE_N1:#ID#, Number) #MIN_N1_PCT_FOR_BLUR# &lt; and
             </VISIBILITY_CODE>
         </UseTemplate>
     </Template>
     <Template Name="A32NX_ENGINE_Turbine_Blurred_Visibility_Template">
         <UseTemplate Name="ASOBO_GT_Visibility">
-            <VISIBILITY_CODE>(L:A32NX_ENGINE_N1:#ID#, Percent) #MIN_N1_PCT_FOR_BLUR# &gt;</VISIBILITY_CODE>
+            <VISIBILITY_CODE>(L:A32NX_ENGINE_N1:#ID#, Number) #MIN_N1_PCT_FOR_BLUR# &gt;</VISIBILITY_CODE>
         </UseTemplate>
     </Template>
     <!-- Base visibility template for turbines -->
@@ -237,6 +266,31 @@
                 <VISIBILITY_CODE>#SAT_ENABLE#</VISIBILITY_CODE>
             </UseTemplate>
         </Component>
+    </Template>
+
+    <!--
+    Template for toggling of light potentiometers that not are bound to a specific lightdef.Type.
+    Needs a condition, requisite and a potentiometer to toggle.
+
+    Main Parameters:
+            - SYNC_FREQUENCY        Default: 1          Speed of update loop, N per second.
+            - TOGGLE_CONDITION      <Boolean>           The condition to trigger a toggle.
+            - TOGGLE_REQUISITE      <Boolean>           The required powered BUS for potentiometer.
+            - POTENTIOMETER         <Number>            The potentiometer index # to toggle.
+    -->
+    <Template Name="FBW_Potentiometer_Toggle">
+        <DefaultTemplateParameters>
+            <SYNC_FREQUENCY>1</SYNC_FREQUENCY>
+            <TOGGLE_REQUISITE></TOGGLE_REQUISITE>
+            <TOGGLE_CONDITION></TOGGLE_CONDITION>
+        </DefaultTemplateParameters>
+
+        <UseTemplate Name="ASOBO_GT_Update">
+            <FREQUENCY>#SYNC_FREQUENCY#</FREQUENCY>
+            <UPDATE_CODE>
+                #TOGGLE_REQUISITE# #TOGGLE_CONDITION# and 100 * #POTENTIOMETER# (&gt;K:2:LIGHT_POTENTIOMETER_SET)
+            </UPDATE_CODE>
+        </UseTemplate>
     </Template>
 
 </ModelBehaviors>
